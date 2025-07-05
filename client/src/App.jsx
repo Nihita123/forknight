@@ -1,17 +1,21 @@
-import { useState } from 'react'
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Home from "./pages/Home";
+import Auth from "./pages/Auth";
 
-import './App.css'
-import Home from './pages/Home'
 
-function App() {
-  const [count, setCount] = useState(0)
-
+const App = () => {
   return (
-    <>
-      
-      <Home />
-    </>
-  )
-}
+    <Router>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/auth" element={<Auth />} />
+        {/* Add other routes here, for example:
+        <Route path="/about" element={<About />} />
+        */}
+      </Routes>
+    </Router>
+  );
+};
 
-export default App
+export default App;
