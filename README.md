@@ -2,12 +2,9 @@
 
 
 
-> “Pretty sure you’ve heard of Fortnite…  
-> But have you ever tried Forknight?”
+> “Pretty sure you’ve heard of Fortnite…  But have you ever tried Forknight?”
 
 ---
-
-## 🚨 Problem Statement
 
 ## 🚨 Problem Statement
 
@@ -16,18 +13,10 @@ Open source is powerful — it builds the internet, fuels our frameworks, and gi
 But let’s be honest: contributing to open source often feels more like a chore than a challenge.  
 You're not rewarded, recognized, or even remembered.
 
-You might:
+You might Push 5 commits, Fix 3 annoying bugs, Review 2 pull requests...  
 
-- Push 5 commits  
-- Fix 3 annoying bugs  
-- Review 2 pull requests...  
-
-And you get:
-
-- No XP  
-- No high-fives  
-- No loot  
-- Just digital silence 🦗
+And you get? 
+No XP, No high-fives, No loot , Just digital silence :(
 
 Meanwhile, Fortnite rewards you for showing up. Duolingo throws a party when you do 5 minutes of Spanish.  
 Why doesn’t GitHub say “Nice work!” when you fix an issue that’s been open for 6 months?
