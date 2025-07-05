@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+
 import {
   Github,
   Trophy,
@@ -16,10 +17,44 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
+//import client id
+const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
+
 export default function GitHubAuthPage() {
   const [showGitHubAuth, setShowGitHubAuth] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const code = urlParams.get("code");
+
+    if (code) {
+      setIsLoading(true);
+      fetch("http://localhost:5000/auth/github", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setIsLoading(false);
+          if (data.success) {
+            setIsSuccess(true);
+            setTimeout(() => {
+              window.location.href = "/";
+            }, 2000);
+          } else {
+            alert("Authorization failed.");
+          }
+        })
+        .catch((err) => {
+          console.error(err);
+          setIsLoading(false);
+          alert("Something went wrong.");
+        });
+    }
+  }, []);
 
   const permissions = [
     {
@@ -57,7 +92,11 @@ export default function GitHubAuthPage() {
   ];
 
   const handleConnect = () => {
-    setShowGitHubAuth(true);
+    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
+    const redirectUri = "http://localhost:5144"; 
+    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=read:user%20repo`;
+
+    window.location.href = githubAuthUrl;
   };
 
   const handleCloseAuth = () => {
@@ -65,19 +104,12 @@ export default function GitHubAuthPage() {
   };
 
   const handleAuthorize = () => {
-    setIsLoading(true);
-    setShowGitHubAuth(false);
+    const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
+    const redirectUri = "http://localhost:5144"; // or 5173 or your Vercel URL
 
-    // Simulate GitHub OAuth flow
-    setTimeout(() => {
-      setIsLoading(false);
-      setIsSuccess(true);
+    const githubOAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=read:user repo`;
 
-      // Redirect back to main page after success
-      setTimeout(() => {
-        window.location.href = "/";
-      }, 2000);
-    }, 2000);
+    window.location.href = githubOAuthUrl;
   };
 
   const handleCancel = () => {
