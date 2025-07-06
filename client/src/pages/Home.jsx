@@ -290,33 +290,6 @@ const Home = () => {
       </div>
 
       {/* Floating Elements */}
-      <div className="fixed inset-0 pointer-events-none z-10">
-        <FloatingBadge delay={0}>
-          <div className="top-20 left-20 w-16 h-16 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center opacity-30">
-            <Trophy className="w-8 h-8 text-white" />
-          </div>
-        </FloatingBadge>
-        <FloatingBadge delay={1}>
-          <div className="top-40 right-32 w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center opacity-30">
-            <Star className="w-6 h-6 text-white" />
-          </div>
-        </FloatingBadge>
-        <FloatingBadge delay={2}>
-          <div className="bottom-40 left-16 w-14 h-14 bg-gradient-to-r from-pink-500 to-red-500 rounded-full flex items-center justify-center opacity-30">
-            <Zap className="w-7 h-7 text-white" />
-          </div>
-        </FloatingBadge>
-        <FloatingBadge delay={0.5}>
-          <div className="top-60 right-20 w-10 h-10 bg-gradient-to-r from-green-500 to-blue-500 rounded-full flex items-center justify-center opacity-25">
-            <Code className="w-5 h-5 text-white" />
-          </div>
-        </FloatingBadge>
-        <FloatingBadge delay={1.5}>
-          <div className="bottom-60 right-40 w-12 h-12 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center opacity-25">
-            <GitBranch className="w-6 h-6 text-white" />
-          </div>
-        </FloatingBadge>
-      </div>
 
       {/* Navigation */}
       <nav className="flex items-center justify-between p-6 max-w-7xl mx-auto relative z-20">
