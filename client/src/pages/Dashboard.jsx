@@ -267,10 +267,11 @@ const Dashboard = () => {
 
         setUser({
           name: profile.name || profile.login,
-          level: calcLevel(totalXP), // ✅ use total XP here
+          level: calcLevel(totalXP),
           xp: totalXP,
           xpToNext: 100 - (totalXP % 100),
-          streak: weekly.commits,
+          streak: weekly.commits, // still weekly commit count
+          dayStreak: challengeList?.debug?.commitStreak ?? 0, // ✅ add this line
           totalCommits: stats.totalCommits,
           totalPRs: stats.totalPRs,
           totalRepos: stats.repos,
@@ -653,7 +654,7 @@ const Dashboard = () => {
                   <div className="text-center">
                     <div className="text-2xl font-bold text-orange-400 flex items-center justify-center gap-1">
                       <Flame className="w-5 h-5" />
-                      {user.streak}
+                      {user.dayStreak}
                     </div>
                     <div className="text-sm text-purple-300">Day Streak</div>
                   </div>
