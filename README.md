@@ -72,7 +72,9 @@ We’re turning every GitHub action into a game mechanic:
 
 Curious to see ForkNight in action? Get ready to level up your open source game!
 
-🌐 **Link To ForkNight:**  [https://forknight.vercel.app/](https://forknight.vercel.app/)
+🎮 **Live Demo Video:** [click to view demo](https://drive.google.com/file/d/1AfEcUWztShdQdwltJV6inlBRDdtFO1nI/view?usp=sharing)
+
+🌐 **Link To ForkNight(coming soon):**  
 
 ---
 
