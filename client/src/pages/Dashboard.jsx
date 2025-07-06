@@ -41,7 +41,6 @@ const getRarityColor = (rarity) => {
   }
 };
 
-
 const AchievementCard = ({ achievement }) => {
   if (!achievement) return null;
   return (
@@ -187,7 +186,6 @@ const Dashboard = () => {
   const [user, setUser] = useState(null); // profile + stats
   const [weeklyStats, setWeeklyStats] = useState(null);
   const [achievements, setAchievements] = useState([]);
-  const [leaderboard, setLeaderboard] = useState([]);
   const [repos, setRepos] = useState([]);
   const [challenges, setChallenges] = useState([]);
   const [achievementSearch, setAchievementSearch] = useState("");
@@ -232,13 +230,12 @@ const Dashboard = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [profile, stats, weekly, ach, lb, repoList, challengeList] =
+        const [profile, stats, weekly, ach, repoList, challengeList] =
           await Promise.all([
             apiGet("/api/github/profile"),
             apiGet("/api/github/stats"),
             apiGet("/api/github/weekly-activity"),
             apiGet("/api/github/achievements"),
-            apiGet("/api/leaderboard"),
             apiGet("/api/github/repos"),
             apiGet("/api/github/challenges"),
           ]);
@@ -267,7 +264,6 @@ const Dashboard = () => {
 
         setWeeklyStats(weekly);
         setAchievements(ach.achievements);
-        setLeaderboard(lb);
         setRepos(repoList);
 
         // Better handling of challenges data
@@ -429,12 +425,6 @@ const Dashboard = () => {
       label: "Repositories",
       icon: <GitBranch className="w-5 h-5" />,
     },
-
-    {
-      id: "leaderboard",
-      label: "Leaderboard",
-      icon: <Crown className="w-5 h-5" />,
-    },
   ];
   const handleLogout = async () => {
     try {
@@ -445,8 +435,6 @@ const Dashboard = () => {
       alert("Logout failed. Try again.");
     }
   };
-
-  const topPlayers = Array.isArray(leaderboard) ? leaderboard.slice(0, 5) : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white flex">
@@ -777,43 +765,6 @@ const Dashboard = () => {
                           </div>
                           <div className="text-xs font-semibold">
                             {achievement.name}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Top Players */}
-                  <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20">
-                    <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
-                      <TrendingUp className="w-5 h-5 text-green-400" />
-                      Top Players
-                    </h3>
-                    <div className="space-y-3">
-                      {topPlayers.map((player) => (
-                        <div
-                          key={player.rank}
-                          className={`flex items-center justify-between p-3 rounded-xl ${
-                            player.name === user.name
-                              ? "bg-gradient-to-r from-purple-600/30 to-pink-600/30 border border-purple-500/30"
-                              : "bg-purple-600/20"
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span className="text-lg">{player.badge}</span>
-                            <div>
-                              <div className="font-semibold text-sm">
-                                {player.name}
-                              </div>
-                              <div className="text-xs text-purple-300">
-                                Level {player.level}
-                              </div>
-                            </div>
-                          </div>
-                          <div className="text-right">
-                            <div className="text-sm font-bold">
-                              {player.xp.toLocaleString()} XP
-                            </div>
                           </div>
                         </div>
                       ))}

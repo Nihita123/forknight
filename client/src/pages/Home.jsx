@@ -10,6 +10,7 @@ import {
   Code,
   Award,
 } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const [typedText, setTypedText] = useState("");
@@ -17,7 +18,7 @@ const Home = () => {
   const [isDeleting, setIsDeleting] = useState(false);
   const [showStats, setShowStats] = useState(false);
   const [particles, setParticles] = useState([]);
-
+  const navigate = useNavigate();
   const words = [
     "Commits",
     "Pull Requests",
@@ -343,7 +344,7 @@ const Home = () => {
             How It Works
           </a>
           <button
-            onClick={() => console.log("Navigate to auth")}
+            onClick={() => navigate("/auth")}
             className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-2 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 animate-glow"
           >
             Get Started
@@ -390,7 +391,7 @@ const Home = () => {
             style={{ animationDelay: "0.9s" }}
           >
             <button
-              onClick={() => console.log("Navigate to auth")}
+              onClick={() => navigate("/auth")}
               className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-8 py-4 rounded-lg font-semibold text-lg flex items-center space-x-2 hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg animate-glow"
             >
               <Github className="w-5 h-5" />
@@ -526,7 +527,7 @@ const Home = () => {
             journey from burnout to badges.
           </p>
           <button
-            onClick={() => console.log("Navigate to auth")}
+            onClick={() => navigate("/auth")}
             className="bg-gradient-to-r from-purple-600 to-pink-600 text-white px-12 py-4 rounded-lg font-semibold text-lg flex items-center space-x-2 mx-auto hover:from-purple-700 hover:to-pink-700 transition-all transform hover:scale-105 shadow-lg animate-glow"
           >
             <Github className="w-5 h-5" />
