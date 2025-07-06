@@ -78,7 +78,6 @@ router.get("/achievements", async (req, res) => {
     // Placeholder logic for streak — can be expanded
     const currentStreak = weeklyStats.commits > 0 ? 1 : 0;
 
-  
     const achievements = [
       {
         id: 1,
@@ -360,10 +359,10 @@ router.get("/challenges", async (req, res) => {
       {
         id: 1,
         name: "Commit Streak",
-        description: "Make 30 commits in 30 days",
+        description: "Make 400 commits in 90 days",
         progress: finalCommitCount,
 
-        total: 50,
+        total: 400,
         xp: 500,
         type: "streak",
         timeframe: "30 days",

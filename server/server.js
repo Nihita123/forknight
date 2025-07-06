@@ -92,8 +92,14 @@ app.get(
     failureRedirect: "/login",
   }),
   (req, res) => {
-    // Success – redirect to frontend
-    res.redirect("http://localhost:5144/dashboard"); // ✅ correct port
+    const allowedOrigins = ["http://localhost:5145", "http://localhost:5144"];
+    const origin = req.headers.origin;
+
+    const redirectURL = allowedOrigins.includes(origin)
+      ? `${origin}/dashboard`
+      : "http://localhost:5144/dashboard"; // fallback default
+
+    res.redirect(redirectURL);
   }
 );
 
