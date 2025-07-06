@@ -1,8 +1,8 @@
-# Forknight
+# ForkNight
 
 
 
-> “Pretty sure you’ve heard of Fortnite…  But have you ever tried Forknight?”
+> “Pretty sure you’ve heard of Fortnite…  But have you ever tried ForkNight?”
 
 ---
 
@@ -31,7 +31,7 @@ We’re developers too. We’ve been there.
 
 That's the real bug.
 
-That's what Forknight is here to solve.
+That's what ForkNight is here to solve.
 
 
 ---
@@ -43,7 +43,7 @@ That's what Forknight is here to solve.
 - Commits earned XP and leveled you up?  
 - You had a leaderboard for your open source grind?
 
-> 💡 Welcome to Forknight.
+> 💡 Welcome to ForkNight.
 
 ---
 

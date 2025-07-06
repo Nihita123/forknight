@@ -113,12 +113,20 @@ const AchievementCard = ({ achievement }) => {
             {achievement.name}
           </h4>
           <p
-            className={`text-sm mb-3 ${
+            className={`text-lg mb-2 ${
+              achievement.unlocked ? "text-white" : "text-purple-300"
+            }`}
+          >
+            {achievement.description}
+          </p>
+
+          <h5
+            className={`font-bold text-sm mb-3 ${
               achievement.unlocked ? "text-purple-100" : "text-purple-400"
             }`}
           >
-            {achievement.unlocked ? achievement.description : "???"}
-          </p>
+            {achievement.unlocked ? `${achievement.xp}xp` : "???"}
+          </h5>
 
           {/* Category */}
           {achievement.category && (
