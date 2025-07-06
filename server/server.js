@@ -14,11 +14,11 @@ const PORT = process.env.PORT || 5000;
 // CORS setup
 app.use(
   cors({
-    origin: "http://localhost:5173", // ← update
-    credentials: true,
+    origin: "http://localhost:5145", // ✅ exact origin, not “true”
+    credentials: true, // ✅ allow cookies/headers
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
-
 // Middleware
 app.use(express.json());
 
@@ -28,6 +28,11 @@ app.use(
     secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
+    cookie: {
+      secure: false, // true only when you switch to HTTPS
+      httpOnly: true,
+      sameSite: "lax", // or "none" + secure:true when you test over HTTPS
+    },
   })
 );
 
@@ -114,6 +119,20 @@ app.get("/api/user", (req, res) => {
   } else {
     res.status(401).json({ message: "Not authenticated" });
   }
+});
+
+app.get("/api/leaderboard", async (req, res) => {
+  if (!req.isAuthenticated()) {
+    return res.status(401).json({ message: "Not authenticated" });
+  }
+
+  // Placeholder logic – replace with real GitHub data processing
+  res.json({
+    leaderboard: [
+      { username: "user1", score: 120 },
+      { username: "user2", score: 100 },
+    ],
+  });
 });
 
 app.listen(PORT, () => {

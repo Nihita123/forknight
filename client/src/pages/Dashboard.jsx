@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Github,
   Trophy,
@@ -15,91 +15,23 @@ import {
   BookOpen,
   Zap,
   Crown,
-  Shield,
-  Rocket,
 } from "lucide-react";
+
+import { apiGet } from "../utils/api";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
-  const [user] = useState({
-    name: "CodeWarrior",
-    level: 42,
-    xp: 18750,
-    xpToNext: 1250,
-    streak: 15,
-    totalCommits: 1847,
-    totalPRs: 156,
-    totalRepos: 23,
-    rank: "Elite Contributor",
-  });
+  /* remote state */
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const [weeklyStats] = useState({
-    commits: 47,
-    prs: 8,
-    reviews: 12,
-    issues: 5,
-  });
+  const [user, setUser] = useState(null); // profile + stats
+  const [weeklyStats, setWeeklyStats] = useState(null);
+  const [achievements, setAchievements] = useState([]);
+  const [leaderboard, setLeaderboard] = useState([]);
 
-  const [achievements] = useState([
-    {
-      id: 1,
-      name: "First Blood",
-      icon: "🏆",
-      description: "First commit ever!",
-      unlocked: true,
-    },
-    {
-      id: 2,
-      name: "Code Ninja",
-      icon: "🥷",
-      description: "100 commits in a month",
-      unlocked: true,
-    },
-    {
-      id: 3,
-      name: "PR Master",
-      icon: "🎯",
-      description: "50 pull requests merged",
-      unlocked: true,
-    },
-    {
-      id: 4,
-      name: "Bug Hunter",
-      icon: "🐛",
-      description: "Fixed 25 critical bugs",
-      unlocked: true,
-    },
-    {
-      id: 5,
-      name: "Open Source Hero",
-      icon: "🦸",
-      description: "Contributed to 10 different repos",
-      unlocked: true,
-    },
-    {
-      id: 6,
-      name: "Legendary",
-      icon: "⚡",
-      description: "Reach level 50",
-      unlocked: false,
-    },
-    {
-      id: 7,
-      name: "Team Player",
-      icon: "👥",
-      description: "Collaborated with 20+ devs",
-      unlocked: true,
-    },
-    {
-      id: 8,
-      name: "Night Owl",
-      icon: "🦉",
-      description: "Commit at 2 AM",
-      unlocked: true,
-    },
-  ]);
-
+  /* still static for now */
   const [challenges] = useState([
     {
       id: 1,
@@ -119,34 +51,79 @@ const Dashboard = () => {
       xp: 300,
       type: "pr",
     },
-    {
-      id: 3,
-      name: "Code Review Champion",
-      description: "Review 20 pull requests",
-      progress: 12,
-      total: 20,
-      xp: 400,
-      type: "review",
-    },
-    {
-      id: 4,
-      name: "Issue Resolver",
-      description: "Close 10 issues",
-      progress: 7,
-      total: 10,
-      xp: 250,
-      type: "issues",
-    },
   ]);
 
-  const [leaderboard] = useState([
-    { rank: 1, name: "CodeMaster3000", xp: 25600, level: 48, badge: "👑" },
-    { rank: 2, name: "DevNinja", xp: 23400, level: 45, badge: "🥈" },
-    { rank: 3, name: "CodeWarrior", xp: 18750, level: 42, badge: "🥉" },
-    { rank: 4, name: "GitGuru", xp: 17200, level: 40, badge: "🏅" },
-    { rank: 5, name: "OpenSourceHero", xp: 16800, level: 39, badge: "⭐" },
-  ]);
+  /* fetch once on mount */
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const [profile, stats, weekly, ach, lb] = await Promise.all([
+          apiGet("/api/github/profile"),
+          apiGet("/api/github/stats"),
+          apiGet("/api/github/weekly-activity"),
+          apiGet("/api/github/achievements"),
+          apiGet("/api/leaderboard"),
+        ]);
 
+        /* merge data into the shape your UI expects */
+        setUser({
+          name: profile.name || profile.login,
+          level: calcLevel(stats.totalCommits),
+          xp: stats.totalCommits,
+          xpToNext: 1000 - (stats.totalCommits % 1000),
+          streak: weekly.commits,
+          totalCommits: stats.totalCommits,
+          totalPRs: stats.totalPRs,
+          totalRepos: stats.repos,
+          rank: "Elite Contributor", // placeholder – compute later
+        });
+        setWeeklyStats(weekly);
+        setAchievements(ach.achievements);
+        setLeaderboard(lb);
+        setLoading(false);
+      } catch (err) {
+        setError(err.message);
+        setLoading(false);
+      }
+    };
+    load();
+  }, []);
+
+  const calcLevel = (xp) => Math.floor(xp / 1000) + 1;
+
+  /* helper to pick an icon for challenges */
+  const getChallengeIcon = (type) => {
+    switch (type) {
+      case "streak":
+        return <Flame className="w-5 h-5" />;
+      case "pr":
+        return <GitPullRequest className="w-5 h-5" />;
+      case "review":
+        return <BookOpen className="w-5 h-5" />;
+      case "issues":
+        return <Target className="w-5 h-5" />;
+      default:
+        return <Code className="w-5 h-5" />;
+    }
+  };
+
+  /* ───── loading / error fallbacks ───── */
+  if (loading) {
+    return (
+      <div className="h-screen flex items-center justify-center text-white">
+        Loading…
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="h-screen flex items-center justify-center text-red-400">
+        {error}
+      </div>
+    );
+  }
+
+  /* ---- side‑nav items (static) ---- */
   const navItems = [
     {
       id: "dashboard",
@@ -168,28 +145,8 @@ const Dashboard = () => {
       label: "Leaderboard",
       icon: <Crown className="w-5 h-5" />,
     },
-    {
-      id: "repositories",
-      label: "Repositories",
-      icon: <Code className="w-5 h-5" />,
-    },
-    { id: "profile", label: "Profile", icon: <Users className="w-5 h-5" /> },
   ];
-
-  const getChallengeIcon = (type) => {
-    switch (type) {
-      case "streak":
-        return <Flame className="w-5 h-5" />;
-      case "pr":
-        return <GitPullRequest className="w-5 h-5" />;
-      case "review":
-        return <BookOpen className="w-5 h-5" />;
-      case "issues":
-        return <Target className="w-5 h-5" />;
-      default:
-        return <Code className="w-5 h-5" />;
-    }
-  };
+  const topPlayers = Array.isArray(leaderboard) ? leaderboard.slice(0, 5) : [];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 text-white flex">
@@ -205,7 +162,9 @@ const Dashboard = () => {
               <h1 className="text-xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
                 Forknight
               </h1>
-              <p className="text-purple-300 text-xs">Level up your open source game</p>
+              <p className="text-purple-300 text-xs">
+                Level up your open source game
+              </p>
             </div>
           </div>
         </div>
@@ -518,7 +477,7 @@ const Dashboard = () => {
                       Top Players
                     </h3>
                     <div className="space-y-3">
-                      {leaderboard.slice(0, 5).map((player) => (
+                      {topPlayers.map((player) => (
                         <div
                           key={player.rank}
                           className={`flex items-center justify-between p-3 rounded-xl ${
