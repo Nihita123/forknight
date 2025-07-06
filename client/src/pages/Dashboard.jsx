@@ -226,7 +226,7 @@ const Dashboard = () => {
     total: totalCount,
     percentage,
   };
-
+  const [totalXP, setTotalXP] = useState(0);
   /* still static for now */
   // Update the challenges section in the useEffect
   useEffect(() => {
@@ -242,37 +242,40 @@ const Dashboard = () => {
             apiGet("/api/github/challenges"),
           ]);
 
+        // Store locally
+        const xpFromAchievements = ach.totalXP;
+        setTotalXP(xpFromAchievements); // also update state in case you need it elsewhere
+
         const getRankFromXP = (xp) => {
-          if (xp >= 500) return "Legendary Coder";
-          if (xp >= 300) return "Elite Contributor";
-          if (xp >= 250) return "Pro Hacker";
-          if (xp >= 150) return "Skilled Dev";
-          if (xp >= 100) return "Code Explorer";
-          if (xp >= 50) return "Rookie Committer";
+          if (xp >= 800) return "Legendary Coder";
+          if (xp >= 600) return "Elite Contributor";
+          if (xp >= 450) return "Pro Hacker";
+          if (xp >= 350) return "Skilled Dev";
+          if (xp >= 200) return "Code Explorer";
+          if (xp >= 100) return "Rookie Committer";
           return "Newbie";
         };
+        const totalXP = stats.totalCommits + xpFromAchievements;
 
         setUser({
           name: profile.name || profile.login,
-          level: calcLevel(stats.totalCommits),
-          xp: stats.totalCommits,
-          xpToNext: 100 - (stats.totalCommits % 100),
+          level: calcLevel(totalXP), // ✅ use total XP here
+          xp: totalXP,
+          xpToNext: 100 - (totalXP % 100),
           streak: weekly.commits,
           totalCommits: stats.totalCommits,
           totalPRs: stats.totalPRs,
           totalRepos: stats.repos,
-          rank: getRankFromXP(stats.totalCommits),
+          rank: getRankFromXP(totalXP),
         });
 
         setWeeklyStats(weekly);
         setAchievements(ach.achievements);
         setRepos(repoList);
 
-        // Better handling of challenges data
-        if (challengeList && challengeList.challenges) {
+        if (challengeList?.challenges) {
           setChallenges(challengeList.challenges);
         } else {
-          // Fallback to empty array if challenges fail to load
           setChallenges([]);
         }
 

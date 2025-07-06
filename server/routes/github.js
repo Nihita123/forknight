@@ -78,83 +78,119 @@ router.get("/achievements", async (req, res) => {
     // Placeholder logic for streak — can be expanded
     const currentStreak = weeklyStats.commits > 0 ? 1 : 0;
 
+  
     const achievements = [
       {
         id: 1,
-        name: "First Blood - First commit down",
+        name: "First Blood",
+        description: "First commit down!",
         unlocked: totalCommits >= 1,
+        xp: 50,
       },
       {
         id: 2,
-        name: "Code Ninja - 50 commits wohoo",
+        name: "Code Ninja",
+        description: "50 commits made",
         unlocked: totalCommits >= 50,
+        xp: 100,
       },
       {
         id: 3,
-        name: "PR Master - 10 pull requests",
-        unlocked: totalPRs >= 50,
+        name: "Commit Beast",
+        description: "200 commits milestone",
+        unlocked: totalCommits >= 200,
+        xp: 150,
       },
       {
         id: 4,
-        name: "Bug Hunter - 10 issues raised",
-        unlocked: totalIssues >= 10,
+        name: "PR Master",
+        description: "10 pull requests merged",
+        unlocked: totalPRs >= 10,
+        xp: 100,
       },
       {
         id: 5,
-        name: "Day One Streaker - 1 day coding streak",
-        unlocked: currentStreak >= 1,
+        name: "Merge Lord",
+        description: "50 pull requests merged",
+        unlocked: totalPRs >= 50,
+        xp: 200,
       },
       {
         id: 6,
-        name: "Consistency Champ - 7-day streak",
-        unlocked: currentStreak >= 7,
+        name: "Bug Hunter",
+        description: "10 issues raised",
+        unlocked: totalIssues >= 10,
+        xp: 75,
       },
       {
         id: 7,
-        name: "Issue Crusher - 50 issues raised",
+        name: "Issue Crusher",
+        description: "50 issues raised",
         unlocked: totalIssues >= 50,
+        xp: 150,
       },
       {
         id: 8,
-        name: "Day One Streaker - 1 day coding streak",
+        name: "Day One Streaker",
+        description: "1-day coding streak",
         unlocked: currentStreak >= 1,
+        xp: 50,
       },
       {
         id: 9,
-        name: "Consistency Champ - 7-day streak",
+        name: "Consistency Champ",
+        description: "7-day coding streak",
         unlocked: currentStreak >= 7,
+        xp: 200,
       },
       {
         id: 10,
-        name: "Weekend Warrior - 10 commits this week",
+        name: "Weekend Warrior",
+        description: "10 commits this week",
         unlocked: weeklyStats.commits >= 10,
+        xp: 75,
       },
       {
         id: 11,
-        name: "Push to the Limit - 20 commits this week",
+        name: "Push to the Limit",
+        description: "20 commits this week",
         unlocked: weeklyStats.commits >= 20,
+        xp: 100,
       },
       {
         id: 12,
-        name: "Open Source Enthusiast - 3 PRs this week",
+        name: "Open Source Enthusiast",
+        description: "3 PRs this week",
         unlocked: weeklyStats.prs >= 3,
+        xp: 80,
       },
       {
         id: 13,
-        name: "Bug Fixer - 3 issues this week",
+        name: "Bug Fixer",
+        description: "3 issues this week",
         unlocked: weeklyStats.issues >= 3,
+        xp: 80,
       },
       {
         id: 14,
-        name: "Weekly Legend - All stats > 5 this week",
+        name: "Weekly Legend",
+        description: "All stats > 5 this week",
         unlocked:
           weeklyStats.commits >= 5 &&
           weeklyStats.prs >= 5 &&
           weeklyStats.issues >= 5,
+        xp: 150,
       },
     ];
+    console.log(
+      "Unlocked Achievements:",
+      achievements.filter((a) => a.unlocked)
+    );
 
-    res.json({ achievements });
+    const totalXP = achievements
+      .filter((ach) => ach.unlocked)
+      .reduce((sum, ach) => sum + ach.xp, 0);
+    res.json({ achievements, totalXP });
   } catch (err) {
     res.status(500).json({ message: "Achievement calc failed", err });
   }
