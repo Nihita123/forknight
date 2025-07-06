@@ -33,9 +33,8 @@ const Dashboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [repos, setRepos] = useState([]);
 
-
   /* still static for now */
-  const [challenges] = useState([
+  const [challenges, setChallenges] = useState([
     {
       id: 1,
       name: "Commit Streak",
@@ -98,7 +97,7 @@ const Dashboard = () => {
     load(); // ✅ Don't forget to call it
   }, []);
 
-  const calcLevel = (xp) => Math.floor(xp / 1000) + 1;
+  const calcLevel = (xp) => Math.floor(xp / 50) + 1;
 
   /* helper to pick an icon for challenges */
   const getChallengeIcon = (type) => {
