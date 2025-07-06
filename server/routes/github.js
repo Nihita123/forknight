@@ -108,4 +108,40 @@ router.get("/leaderboard", async (_req, res) => {
   ]);
 });
 
+router.get("/repos", ensureAuth, async (req, res) => {
+  try {
+    const accessToken = req.user.accessToken;
+    const response = await fetch(
+      "https://api.github.com/user/repos?per_page=100",
+      {
+        headers: { Authorization: `token ${accessToken}` },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error("GitHub API error");
+    }
+
+    const repos = await response.json();
+
+    // Optional: shape data before sending
+    const mappedRepos = repos.map((repo) => ({
+      id: repo.id,
+      name: repo.name,
+      description: repo.description,
+      stars: repo.stargazers_count,
+      forks: repo.forks_count,
+      language: repo.language,
+      url: repo.html_url,
+    }));
+
+    res.json(mappedRepos);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ error: "Failed to fetch repositories", details: error.message });
+  }
+});
+
+
 export default router;

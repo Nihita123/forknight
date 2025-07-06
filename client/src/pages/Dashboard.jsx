@@ -30,6 +30,8 @@ const Dashboard = () => {
   const [weeklyStats, setWeeklyStats] = useState(null);
   const [achievements, setAchievements] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
+  const [repos, setRepos] = useState([]);
+
 
   /* still static for now */
   const [challenges] = useState([
@@ -57,12 +59,13 @@ const Dashboard = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [profile, stats, weekly, ach, lb] = await Promise.all([
+        const [profile, stats, weekly, ach, lb, repoList] = await Promise.all([
           apiGet("/api/github/profile"),
           apiGet("/api/github/stats"),
           apiGet("/api/github/weekly-activity"),
           apiGet("/api/github/achievements"),
           apiGet("/api/leaderboard"),
+          apiGet("/api/github/repos"),
         ]);
 
         /* merge data into the shape your UI expects */
@@ -80,6 +83,7 @@ const Dashboard = () => {
         setWeeklyStats(weekly);
         setAchievements(ach.achievements);
         setLeaderboard(lb);
+        setRepos(repoList);
         setLoading(false);
       } catch (err) {
         setError(err.message);
@@ -140,6 +144,12 @@ const Dashboard = () => {
       label: "Achievements",
       icon: <Award className="w-5 h-5" />,
     },
+    {
+      id: "repositories",
+      label: "Repositories",
+      icon: <GitBranch className="w-5 h-5" />,
+    },
+
     {
       id: "leaderboard",
       label: "Leaderboard",
@@ -648,15 +658,46 @@ const Dashboard = () => {
             </div>
           )}
 
-          {(activeTab === "repositories" || activeTab === "profile") && (
-            <div className="max-w-4xl mx-auto">
-              <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-12 border border-purple-500/20 text-center">
-                <div className="text-6xl mb-4">🚧</div>
-                <h3 className="text-2xl font-bold mb-2">Coming Soon!</h3>
-                <p className="text-purple-300">
-                  This feature is under development. Check back soon for
-                  updates!
-                </p>
+          {activeTab === "repositories" && (
+            <div className="max-w-5xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {repos.length === 0 ? (
+                  <div className="col-span-full text-center text-purple-300">
+                    No repositories found.
+                  </div>
+                ) : (
+                  repos.map((repo) => (
+                    <a
+                      key={repo.id}
+                      href={repo.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="bg-black/20 backdrop-blur-sm border border-purple-500/20 rounded-2xl p-6 transition hover:scale-[1.02]"
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <h3 className="text-xl font-bold text-white">
+                          {repo.name}
+                        </h3>
+                        <span className="text-xs bg-purple-600/20 text-purple-300 px-2 py-1 rounded-full">
+                          {repo.language || "Unknown"}
+                        </span>
+                      </div>
+                      <p className="text-sm text-purple-300 mb-4">
+                        {repo.description || "No description provided."}
+                      </p>
+                      <div className="flex items-center gap-4 text-sm text-purple-400">
+                        <div className="flex items-center gap-1">
+                          <Star className="w-4 h-4" />
+                          {repo.stars}
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <GitBranch className="w-4 h-4" />
+                          {repo.forks}
+                        </div>
+                      </div>
+                    </a>
+                  ))
+                )}
               </div>
             </div>
           )}
