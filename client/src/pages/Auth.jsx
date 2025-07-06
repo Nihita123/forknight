@@ -93,10 +93,8 @@ export default function GitHubAuthPage() {
 
   const handleConnect = () => {
     const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
-    const redirectUri = "http://localhost:5144"; 
-    const githubAuthUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=read:user%20repo`;
-
-    window.location.href = githubAuthUrl;
+    const redirectUri = "http://localhost:5144";
+    window.location.href = "http://localhost:5000/auth/github";
   };
 
   const handleCloseAuth = () => {

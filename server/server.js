@@ -13,7 +13,7 @@ app.use("/api/github", githubRoutes);
 // CORS setup
 app.use(
   cors({
-    origin: "http://localhost:5144", // your frontend port
+    origin: "http://localhost:5173", // ← update
     credentials: true,
   })
 );
