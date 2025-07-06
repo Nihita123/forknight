@@ -16,9 +16,167 @@ import {
   Zap,
   Crown,
   LogOut,
+  Search,
+  Filter,
+  CheckCircle,
+  Lock,
 } from "lucide-react";
 
 import { apiGet, apiPost } from "../utils/api";
+
+const getRarityColor = (rarity) => {
+  switch (rarity) {
+    case "common":
+      return "from-gray-600 to-gray-700";
+    case "uncommon":
+      return "from-green-600 to-green-700";
+    case "rare":
+      return "from-blue-600 to-blue-700";
+    case "epic":
+      return "from-purple-600 to-purple-700";
+    case "legendary":
+      return "from-yellow-500 to-yellow-600";
+    default:
+      return "from-purple-500 to-purple-600";
+  }
+};
+
+
+const AchievementCard = ({ achievement }) => {
+  if (!achievement) return null;
+  return (
+    <div
+      className={`relative overflow-hidden rounded-xl transition-all duration-300 hover:scale-105 ${
+        achievement.unlocked
+          ? `bg-gradient-to-br ${getRarityColor(
+              achievement.rarity
+            )} backdrop-blur-sm`
+          : "bg-black/40 backdrop-blur-sm border border-purple-500/20"
+      }`}
+    >
+      {/* Rarity Indicator */}
+      {achievement.unlocked && achievement.rarity && (
+        <div className="absolute top-2 right-2">
+          <div
+            className={`px-2 py-1 rounded-full text-xs font-semibold ${
+              achievement.rarity === "common"
+                ? "bg-gray-600/80 text-gray-100"
+                : achievement.rarity === "uncommon"
+                ? "bg-green-600/80 text-green-100"
+                : achievement.rarity === "rare"
+                ? "bg-blue-600/80 text-blue-100"
+                : achievement.rarity === "epic"
+                ? "bg-purple-600/80 text-purple-100"
+                : achievement.rarity === "legendary"
+                ? "bg-yellow-600/80 text-yellow-100"
+                : "bg-purple-600/80 text-purple-100"
+            }`}
+          >
+            {achievement.rarity}
+          </div>
+        </div>
+      )}
+
+      {/* Lock Indicator */}
+      {!achievement.unlocked && (
+        <div className="absolute top-2 right-2">
+          <Lock className="w-5 h-5 text-purple-400" />
+        </div>
+      )}
+
+      <div className="p-6">
+        {/* Achievement Icon */}
+        <div className="text-center mb-4">
+          <div
+            className={`inline-flex items-center justify-center w-16 h-16 rounded-full text-3xl mb-2 ${
+              achievement.unlocked
+                ? "bg-gradient-to-r from-yellow-500 to-orange-500"
+                : "bg-purple-600/20 text-purple-400"
+            }`}
+          >
+            {achievement.unlocked ? (
+              achievement.icon || "🏆"
+            ) : (
+              <Lock className="w-8 h-8" />
+            )}
+          </div>
+        </div>
+
+        {/* Info */}
+        <div className="text-center">
+          <h4
+            className={`font-bold text-lg mb-2 ${
+              achievement.unlocked ? "text-white" : "text-purple-300"
+            }`}
+          >
+            {achievement.name}
+          </h4>
+          <p
+            className={`text-sm mb-3 ${
+              achievement.unlocked ? "text-purple-100" : "text-purple-400"
+            }`}
+          >
+            {achievement.unlocked ? achievement.description : "???"}
+          </p>
+
+          {/* Category */}
+          {achievement.category && (
+            <div className="mb-3">
+              <span className="inline-block bg-purple-600/30 text-purple-200 px-2 py-1 rounded-full text-xs">
+                {achievement.category}
+              </span>
+            </div>
+          )}
+
+          {/* Progress */}
+          {achievement.progress !== undefined && achievement.maxProgress && (
+            <div className="mb-3">
+              <div className="flex justify-between text-xs text-purple-300 mb-1">
+                <span>Progress</span>
+                <span>
+                  {achievement.progress}/{achievement.maxProgress}
+                </span>
+              </div>
+              <div className="w-full bg-purple-900/50 rounded-full h-2">
+                <div
+                  className="bg-gradient-to-r from-pink-500 to-purple-500 h-2 rounded-full transition-all duration-300"
+                  style={{
+                    width: `${Math.min(
+                      (achievement.progress / achievement.maxProgress) * 100,
+                      100
+                    )}%`,
+                  }}
+                ></div>
+              </div>
+            </div>
+          )}
+
+          {/* XP Reward */}
+          {achievement.xpReward && (
+            <div className="flex items-center justify-center gap-1 text-yellow-400 text-sm font-semibold">
+              <Zap className="w-4 h-4" />+{achievement.xpReward} XP
+            </div>
+          )}
+
+          {/* Unlock Date */}
+          {achievement.unlocked && achievement.unlockedAt && (
+            <div className="mt-2 text-xs text-purple-300">
+              Unlocked {formatUnlockDate(achievement.unlockedAt)}
+            </div>
+          )}
+
+          {/* Completion Badge */}
+          {achievement.unlocked && (
+            <div className="absolute top-2 left-2">
+              <CheckCircle className="w-5 h-5 text-green-400" />
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -32,6 +190,43 @@ const Dashboard = () => {
   const [achievements, setAchievements] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [repos, setRepos] = useState([]);
+
+  const [achievementSearch, setAchievementSearch] = useState("");
+  const [achievementFilter, setAchievementFilter] = useState("all");
+  const [achievementSort, setAchievementSort] = useState("recent");
+
+  // Derived filtered list based on search and filter
+  const filteredAchievements = achievements
+    .filter((achievement) => {
+      if (achievementFilter === "unlocked") return achievement.unlocked;
+      if (achievementFilter === "locked") return !achievement.unlocked;
+      return true;
+    })
+    .filter((achievement) =>
+      achievement.name.toLowerCase().includes(achievementSearch.toLowerCase())
+    );
+
+  // Group achievements by category if needed
+  const achievementsByCategory = achievements.reduce((acc, achievement) => {
+    const category = achievement.category || "Uncategorized";
+    if (!acc[category]) acc[category] = [];
+    acc[category].push(achievement);
+    return acc;
+  }, {});
+
+  // Compute stats
+  const unlockedCount = achievements.filter((a) => a.unlocked).length;
+  const totalCount = achievements.length;
+  const lockedCount = totalCount - unlockedCount;
+  const percentage =
+    totalCount > 0 ? ((unlockedCount / totalCount) * 100).toFixed(1) : 0;
+
+  const achievementStats = {
+    unlocked: unlockedCount,
+    locked: lockedCount,
+    total: totalCount,
+    percentage,
+  };
 
   /* still static for now */
   const [challenges] = useState([
@@ -603,7 +798,7 @@ const Dashboard = () => {
             </div>
           )}
 
-          {activeTab === "achievements" && (
+          {/* {activeTab === "achievements" && (
             <div className="max-w-4xl mx-auto">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {achievements.map((achievement) => (
@@ -639,7 +834,205 @@ const Dashboard = () => {
                 ))}
               </div>
             </div>
+          )} */}
+
+          {activeTab === "achievements" && (
+            <div className="max-w-6xl mx-auto">
+              {/* Achievement Stats Overview */}
+              <div className="bg-gradient-to-r from-purple-600/30 to-pink-600/30 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-purple-500/20">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-yellow-400">
+                      {achievementStats.unlocked}
+                    </div>
+                    <div className="text-sm text-purple-300">Unlocked</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-purple-400">
+                      {achievementStats.locked}
+                    </div>
+                    <div className="text-sm text-purple-300">Locked</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-green-400">
+                      {achievementStats.total}
+                    </div>
+                    <div className="text-sm text-purple-300">Total</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-orange-400">
+                      {achievementStats.percentage}%
+                    </div>
+                    <div className="text-sm text-purple-300">Completion</div>
+                  </div>
+                </div>
+                <div className="mt-6">
+                  <div className="w-full bg-purple-900/50 rounded-full h-4">
+                    <div
+                      className="bg-gradient-to-r from-yellow-500 to-orange-500 h-4 rounded-full transition-all duration-300"
+                      style={{ width: `${achievementStats.percentage}%` }}
+                    ></div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Filters and Search */}
+              <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-purple-500/20">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {/* Search */}
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400 w-5 h-5" />
+                    <input
+                      type="text"
+                      placeholder="Search achievements..."
+                      value={achievementSearch}
+                      onChange={(e) => setAchievementSearch(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-purple-600/20 border border-purple-500/30 rounded-xl text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-500/50"
+                    />
+                  </div>
+
+                  {/* Filter */}
+                  <div className="relative">
+                    <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 text-purple-400 w-5 h-5" />
+                    <select
+                      value={achievementFilter}
+                      onChange={(e) => setAchievementFilter(e.target.value)}
+                      className="w-full pl-10 pr-4 py-3 bg-purple-600/20 border border-purple-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 appearance-none"
+                    >
+                      <option value="all">All Achievements</option>
+                      <option value="unlocked">Unlocked Only</option>
+                      <option value="locked">Locked Only</option>
+                    </select>
+                  </div>
+
+                  {/* Sort */}
+                  <div className="relative">
+                    <select
+                      value={achievementSort}
+                      onChange={(e) => setAchievementSort(e.target.value)}
+                      className="w-full px-4 py-3 bg-purple-600/20 border border-purple-500/30 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-500/50 appearance-none"
+                    >
+                      <option value="recent">Most Recent</option>
+                      <option value="alphabetical">Alphabetical</option>
+                      <option value="category">By Category</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* Achievement Categories */}
+              {achievementSort === "category" && (
+                <div className="space-y-8">
+                  {Object.entries(achievementsByCategory).map(
+                    ([category, categoryAchievements]) => (
+                      <div
+                        key={category}
+                        className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20"
+                      >
+                        <h3 className="text-2xl font-bold mb-6 flex items-center gap-3">
+                          <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-2 rounded-lg">
+                            {category === "Commits" && (
+                              <Code className="w-6 h-6" />
+                            )}
+                            {category === "Pull Requests" && (
+                              <GitPullRequest className="w-6 h-6" />
+                            )}
+                            {category === "Reviews" && (
+                              <BookOpen className="w-6 h-6" />
+                            )}
+                            {category === "Issues" && (
+                              <Target className="w-6 h-6" />
+                            )}
+                            {category === "Streaks" && (
+                              <Flame className="w-6 h-6" />
+                            )}
+                            {category === "Repositories" && (
+                              <GitBranch className="w-6 h-6" />
+                            )}
+                            {category === "Social" && (
+                              <Users className="w-6 h-6" />
+                            )}
+                            {category === "Special" && (
+                              <Star className="w-6 h-6" />
+                            )}
+                            {![
+                              "Commits",
+                              "Pull Requests",
+                              "Reviews",
+                              "Issues",
+                              "Streaks",
+                              "Repositories",
+                              "Social",
+                              "Special",
+                            ].includes(category) && (
+                              <Award className="w-6 h-6" />
+                            )}
+                          </div>
+                          {category}
+                          <span className="text-sm text-purple-300 font-normal">
+                            (
+                            {
+                              categoryAchievements.filter((a) => a.unlocked)
+                                .length
+                            }
+                            /{categoryAchievements.length})
+                          </span>
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {categoryAchievements.map((achievement) => (
+                            <AchievementCard
+                              key={achievement.id}
+                              achievement={achievement}
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  )}
+                </div>
+              )}
+
+              {/* Achievement Grid (for non-category view) */}
+              {achievementSort !== "category" && (
+                <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20">
+                  <h3 className="text-2xl font-bold mb-6">
+                    {achievementFilter === "all" && "All Achievements"}
+                    {achievementFilter === "unlocked" &&
+                      "Unlocked Achievements"}
+                    {achievementFilter === "locked" && "Locked Achievements"}
+                    {achievementSearch && ` - "${achievementSearch}"`}
+                  </h3>
+                  {filteredAchievements.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {filteredAchievements.map((achievement) => (
+                        <AchievementCard
+                          key={achievement.id}
+                          achievement={achievement}
+                        />
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-12">
+                      <Award className="w-16 h-16 text-purple-400 mx-auto mb-4 opacity-50" />
+                      <p className="text-xl text-purple-300 mb-2">
+                        No achievements found
+                      </p>
+                      <p className="text-sm text-purple-400">
+                        {achievementSearch
+                          ? "Try a different search term"
+                          : "Keep coding to unlock achievements!"}
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           )}
+
+          {/* Achievement Card Component */}
+          <AchievementCard/>
+
+          
 
           {activeTab === "leaderboard" && (
             <div className="max-w-2xl mx-auto">

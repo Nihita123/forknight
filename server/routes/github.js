@@ -11,7 +11,7 @@ import {
 
 const router = express.Router();
 
-/* Middleware that protects every route below */
+// Middleware to protect routes
 const ensureAuth = (req, res, next) =>
   req.isAuthenticated()
     ? next()
@@ -63,32 +63,53 @@ router.get("/weekly-activity", async (req, res) => {
 
 /* ------------------------------------------------------------------ */
 /*  /api/github/achievements  --------------------------------------- */
-/*  Simple example: compute on the fly from stats.                    */
 router.get("/achievements", async (req, res) => {
   try {
     const token = req.user.accessToken;
     const login = req.user.username;
 
-    const totalCommits = await getTotalCommits(token);
-    const totalPRs = await getTotalPRs(token, login);
+    const [totalCommits, totalPRs, totalIssues, weeklyStats] =
+      await Promise.all([
+        getTotalCommits(token),
+        getTotalPRs(token, login),
+        getTotalIssues(token, login),
+        getWeeklyStats(token),
+      ]);
+
+    // Placeholder logic for streak — can be expanded
+    const currentStreak = weeklyStats.commits > 0 ? 1 : 0;
 
     const achievements = [
       {
         id: 1,
-        name: "First Blood",
+        name: "First Blood - First commit down",
         unlocked: totalCommits >= 1,
       },
       {
         id: 2,
-        name: "Code Ninja",
-        unlocked: totalCommits >= 100,
+        name: "Code Ninja - 50 commits wohoo",
+        unlocked: totalCommits >= 50,
       },
       {
         id: 3,
         name: "PR Master",
         unlocked: totalPRs >= 50,
       },
-      // add more rules here …
+      {
+        id: 4,
+        name: "Bug Hunter - 10 issues raised",
+        unlocked: totalIssues >= 10,
+      },
+      {
+        id: 5,
+        name: "Day One Streaker - 1 day coding streak",
+        unlocked: currentStreak >= 1,
+      },
+      {
+        id: 6,
+        name: "Consistency Champ - 7-day streak",
+        unlocked: currentStreak >= 7,
+      },
     ];
 
     res.json({ achievements });
@@ -98,8 +119,7 @@ router.get("/achievements", async (req, res) => {
 });
 
 /* ------------------------------------------------------------------ */
-/*  /api/leaderboard  ------------------------------------------------ */
-/*  For now: stubbed. In production you’d read from DB.               */
+/*  /api/github/leaderboard  ---------------------------------------- */
 router.get("/leaderboard", async (_req, res) => {
   res.json([
     { rank: 1, name: "CodeMaster3000", xp: 25600, level: 48 },
@@ -108,9 +128,12 @@ router.get("/leaderboard", async (_req, res) => {
   ]);
 });
 
-router.get("/repos", ensureAuth, async (req, res) => {
+/* ------------------------------------------------------------------ */
+/*  /api/github/repos  ---------------------------------------------- */
+router.get("/repos", async (req, res) => {
   try {
     const accessToken = req.user.accessToken;
+
     const response = await fetch(
       "https://api.github.com/user/repos?per_page=100",
       {
@@ -124,7 +147,6 @@ router.get("/repos", ensureAuth, async (req, res) => {
 
     const repos = await response.json();
 
-    // Optional: shape data before sending
     const mappedRepos = repos.map((repo) => ({
       id: repo.id,
       name: repo.name,
@@ -137,11 +159,11 @@ router.get("/repos", ensureAuth, async (req, res) => {
 
     res.json(mappedRepos);
   } catch (error) {
-    res
-      .status(500)
-      .json({ error: "Failed to fetch repositories", details: error.message });
+    res.status(500).json({
+      error: "Failed to fetch repositories",
+      details: error.message,
+    });
   }
 });
-
 
 export default router;

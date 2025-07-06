@@ -3,7 +3,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 
 /**
- * Helper: call GitHub REST API with automatic token header.
+ * Helper: call GitHub REST API with token.
  */
 export const callRest = async (token, url, params = {}) => {
   const { data } = await axios.get(url, {
@@ -15,7 +15,7 @@ export const callRest = async (token, url, params = {}) => {
 };
 
 /**
- * Helper: call GitHub GraphQL API.
+ * Helper: call GitHub GraphQL API with token.
  */
 export const callGraphQL = async (token, query, variables = {}) => {
   const { data } = await axios.post(
@@ -28,12 +28,11 @@ export const callGraphQL = async (token, query, variables = {}) => {
 };
 
 /* ------------------------------------------------------------------ */
-/*  Public helper functions used by the router                        */
+/*  Public functions used in routes                                   */
 /* ------------------------------------------------------------------ */
 
-/** 1️⃣  Basic profile  ------------------------------------------------ */
+/** Get authenticated user's basic profile info */
 export const getProfile = async (token) => {
-  // GET /user returns the authenticated user
   const user = await callRest(token, "/user");
   return {
     login: user.login,
@@ -46,20 +45,21 @@ export const getProfile = async (token) => {
   };
 };
 
-/** 2️⃣  Repo / PR / Issue counts  ------------------------------------ */
+/** Get total public repos of the user */
 export const getRepoCount = async (token) => {
   const { public_repos } = await callRest(token, "/user");
   return public_repos;
 };
 
+/** Get total pull requests by user */
 export const getTotalPRs = async (token, login) => {
-  // Search API – type:pr author:USERNAME
   const { total_count } = await callRest(token, "/search/issues", {
     q: `type:pr+author:${login}`,
   });
   return total_count;
 };
 
+/** Get total issues raised by user */
 export const getTotalIssues = async (token, login) => {
   const { total_count } = await callRest(token, "/search/issues", {
     q: `type:issue+author:${login}`,
@@ -67,13 +67,15 @@ export const getTotalIssues = async (token, login) => {
   return total_count;
 };
 
-/** 3️⃣  Total commits & streak via GraphQL  -------------------------- */
+/** Get total contributions (commits) using GraphQL */
 export const getTotalCommits = async (token) => {
   const query = `
     query {
       viewer {
         contributionsCollection {
-          contributionCalendar { totalContributions }
+          contributionCalendar {
+            totalContributions
+          }
         }
       }
     }
@@ -83,7 +85,7 @@ export const getTotalCommits = async (token) => {
     .totalContributions;
 };
 
-/** 4️⃣  Weekly stats (last 7 days)  ---------------------------------- */
+/** Get total stats for past 7 days */
 export const getWeeklyStats = async (token) => {
   const to = dayjs().endOf("day").toISOString();
   const from = dayjs().subtract(7, "day").startOf("day").toISOString();
