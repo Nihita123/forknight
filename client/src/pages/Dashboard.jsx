@@ -255,17 +255,18 @@ const Dashboard = () => {
           if (xp >= 100) return "Rookie Committer";
           return "Newbie";
         };
+        const totalXP = stats.totalCommits + xpFromAchievements;
 
         setUser({
           name: profile.name || profile.login,
-          level: calcLevel(stats.totalCommits),
-          xp: stats.totalCommits + xpFromAchievements,
-          xpToNext: 100 - (stats.totalCommits % 100),
+          level: calcLevel(totalXP), // ✅ use total XP here
+          xp: totalXP,
+          xpToNext: 100 - (totalXP % 100),
           streak: weekly.commits,
           totalCommits: stats.totalCommits,
           totalPRs: stats.totalPRs,
           totalRepos: stats.repos,
-          rank: getRankFromXP(stats.totalCommits + xpFromAchievements),
+          rank: getRankFromXP(totalXP),
         });
 
         setWeeklyStats(weekly);
@@ -288,7 +289,6 @@ const Dashboard = () => {
 
     load();
   }, []);
-  
 
   // Updated challenge card component for better progress display
   const ChallengeCard = ({ challenge }) => {

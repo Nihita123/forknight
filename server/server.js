@@ -14,7 +14,7 @@ const PORT = process.env.PORT || 5000;
 // CORS setup
 app.use(
   cors({
-    origin: "http://localhost:5144", // ✅ exact origin, not “true”
+    origin: "http://localhost:5145", // ✅ exact origin, not “true”
     credentials: true, // ✅ allow cookies/headers
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
@@ -83,7 +83,7 @@ app.get(
   }),
   (req, res) => {
     // Success – redirect to frontend
-    res.redirect("http://localhost:5144/dashboard"); // ✅ correct port
+    res.redirect("http://localhost:5145/dashboard"); // ✅ correct port
   }
 );
 
