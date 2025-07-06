@@ -73,7 +73,7 @@ const Dashboard = () => {
           name: profile.name || profile.login,
           level: calcLevel(stats.totalCommits),
           xp: stats.totalCommits,
-          xpToNext: 1000 - (stats.totalCommits % 1000),
+          xpToNext: 100 - (stats.totalCommits % 100),
           streak: weekly.commits,
           totalCommits: stats.totalCommits,
           totalPRs: stats.totalPRs,
@@ -93,7 +93,7 @@ const Dashboard = () => {
     load();
   }, []);
 
-  const calcLevel = (xp) => Math.floor(xp / 1000) + 1;
+  const calcLevel = (xp) => Math.floor(xp / 50) + 1;
 
   /* helper to pick an icon for challenges */
   const getChallengeIcon = (type) => {
@@ -208,7 +208,7 @@ const Dashboard = () => {
             <div className="w-full bg-purple-900/50 rounded-full h-2">
               <div
                 className="bg-gradient-to-r from-pink-500 to-purple-500 h-2 rounded-full"
-                style={{ width: `${((user.xp % 1000) / 1000) * 100}%` }}
+                style={{ width: `${((user.xp % 50) / 50) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -334,7 +334,7 @@ const Dashboard = () => {
                   <div className="w-full bg-purple-900/50 rounded-full h-3">
                     <div
                       className="bg-gradient-to-r from-pink-500 to-purple-500 h-3 rounded-full transition-all duration-300"
-                      style={{ width: `${((user.xp % 1000) / 1000) * 100}%` }}
+                      style={{ width: `${((user.xp % 50) / 50) * 100}%` }}
                     ></div>
                   </div>
                 </div>
