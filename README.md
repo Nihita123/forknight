@@ -146,7 +146,7 @@ npm run dev
 cd client
 npm run dev
 ```
-Go to http://localhost:5173 in your browser.
+Go to http://localhost:5144 in your browser.
 
 Have Fun Contributing!
 
