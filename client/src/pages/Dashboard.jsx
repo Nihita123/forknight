@@ -32,43 +32,24 @@ const Dashboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [repos, setRepos] = useState([]);
 
-
-  /* still static for now */
-  const [challenges] = useState([
-    {
-      id: 1,
-      name: "Commit Streak",
-      description: "Make 30 commits in 30 days",
-      progress: 15,
-      total: 30,
-      xp: 500,
-      type: "streak",
-    },
-    {
-      id: 2,
-      name: "PR Perfectionist",
-      description: "Get 5 PRs merged this week",
-      progress: 3,
-      total: 5,
-      xp: 300,
-      type: "pr",
-    },
-  ]);
+  /* - */
+  const [challenges, setChallenges] = useState([]);
 
   /* fetch once on mount */
   useEffect(() => {
     const load = async () => {
       try {
-        const [profile, stats, weekly, ach, lb, repoList] = await Promise.all([
-          apiGet("/api/github/profile"),
-          apiGet("/api/github/stats"),
-          apiGet("/api/github/weekly-activity"),
-          apiGet("/api/github/achievements"),
-          apiGet("/api/leaderboard"),
-          apiGet("/api/github/repos"),
-        ]);
+        const [profile, stats, weekly, ach, lb, repoList, challengeList] =
+          await Promise.all([
+            apiGet("/api/github/profile"),
+            apiGet("/api/github/stats"),
+            apiGet("/api/github/weekly-activity"),
+            apiGet("/api/github/achievements"),
+            apiGet("/api/leaderboard"),
+            apiGet("/api/github/repos"),
+            apiGet("/api/github/challenges"),
+          ]);
 
-        /* merge data into the shape your UI expects */
         setUser({
           name: profile.name || profile.login,
           level: calcLevel(stats.totalCommits),
@@ -78,21 +59,27 @@ const Dashboard = () => {
           totalCommits: stats.totalCommits,
           totalPRs: stats.totalPRs,
           totalRepos: stats.repos,
-          rank: "Elite Contributor", // placeholder – compute later
+          rank: "Elite Contributor",
         });
+
         setWeeklyStats(weekly);
         setAchievements(ach.achievements);
         setLeaderboard(lb);
         setRepos(repoList);
+        setChallenges(challengeList.challenges); // ✅ THIS LINE BELONGS HERE
         setLoading(false);
       } catch (err) {
         setError(err.message);
         setLoading(false);
       }
     };
-    load();
+
+    load(); // ✅ Don't forget to call it
   }, []);
 
+  //--
+
+  //--
   const calcLevel = (xp) => Math.floor(xp / 1000) + 1;
 
   /* helper to pick an icon for challenges */
