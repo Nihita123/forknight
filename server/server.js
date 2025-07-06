@@ -12,13 +12,23 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // CORS setup
+const allowedOrigins = ["http://localhost:5145", "http://localhost:5144"];
+
 app.use(
   cors({
-    origin: "http://localhost:5144", // ✅ exact origin, not “true”
-    credentials: true, // ✅ allow cookies/headers
+    origin: function (origin, callback) {
+      // allow requests with no origin (like curl or Postman) or if origin is allowed
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
+
 // Middleware
 app.use(express.json());
 
@@ -83,7 +93,7 @@ app.get(
   }),
   (req, res) => {
     // Success – redirect to frontend
-    res.redirect("http://localhost:5144/dashboard"); // ✅ correct port
+    res.redirect("http://localhost:5145/dashboard"); // ✅ correct port
   }
 );
 
