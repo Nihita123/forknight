@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+
 import {
   Github,
   Trophy,
@@ -445,19 +447,18 @@ const Dashboard = () => {
       <div className="w-64 bg-black/30 backdrop-blur-md border-r border-purple-500/20 flex flex-col">
         {/* Logo */}
         <div className="p-6 border-b border-purple-500/20">
-          <div className="flex items-center space-x-3">
+          <Link to="/" className="flex items-center space-x-3 hover:opacity-80">
             <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-2 rounded-xl">
-              <Github className="w-6 h-6" />
+              <Github className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
-                Forknight
-              </h1>
-              <p className="text-purple-300 text-xs">
-                Level up your open source game
-              </p>
-            </div>
-          </div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+              Forknight
+            </h1>
+          </Link>
+
+          <p className="text-purple-300 text-xs">
+            Level up your open source game
+          </p>
         </div>
 
         {/* User Card */}
