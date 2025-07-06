@@ -11,7 +11,7 @@ import {
 
 const router = express.Router();
 
-// Middleware to protect routes
+
 const ensureAuth = (req, res, next) =>
   req.isAuthenticated()
     ? next()
@@ -118,13 +118,11 @@ router.get("/achievements", async (req, res) => {
   }
 });
 
-/* ------------------------------------------------------------------ */
-/*  /api/github/leaderboard  ---------------------------------------- */
 router.get("/leaderboard", async (_req, res) => {
   res.json([
-    { rank: 1, name: "CodeMaster3000", xp: 25600, level: 48 },
-    { rank: 2, name: "DevNinja", xp: 23400, level: 45 },
-    { rank: 3, name: "CodeWarrior", xp: 18750, level: 42 },
+    { rank: 1, name: "CodeMaster3000", xp: 25600, level: 48, badge: "🏆" },
+    { rank: 2, name: "DevNinja", xp: 23400, level: 45, badge: "🥈" },
+    { rank: 3, name: "CodeWarrior", xp: 18750, level: 42, badge: "🥉" },
   ]);
 });
 
@@ -163,6 +161,74 @@ router.get("/repos", async (req, res) => {
       error: "Failed to fetch repositories",
       details: error.message,
     });
+  }
+});
+
+
+/* ------------------------------------------------------------------ */
+/*  /api/github/challenges  ----------------------------------------- */
+router.get("/challenges", async (req, res) => {
+  const accessToken = req.user.accessToken;
+
+  try {
+    const [eventsRes, userRes] = await Promise.all([
+      fetch(`https://api.github.com/users/${req.user.username}/events`, {
+        headers: {
+          Authorization: `token ${accessToken}`,
+          Accept: "application/vnd.github.v3+json",
+        },
+      }),
+      fetch("https://api.github.com/user", {
+        headers: {
+          Authorization: `token ${accessToken}`,
+        },
+      }),
+    ]);
+
+    const events = await eventsRes.json();
+    const user = await userRes.json();
+
+    let commits = 0;
+    let prs = 0;
+
+    events.forEach((event) => {
+      if (event.type === "PushEvent") {
+        commits += event.payload.commits.length;
+      }
+      if (
+        event.type === "PullRequestEvent" &&
+        event.payload.action === "closed" &&
+        event.payload.pull_request.merged
+      ) {
+        prs += 1;
+      }
+    });
+
+    const challenges = [
+      {
+        id: 1,
+        name: "Commit Streak",
+        description: "Make 30 commits in 30 days",
+        progress: commits,
+        total: 30,
+        xp: 500,
+        type: "streak",
+      },
+      {
+        id: 2,
+        name: "PR Perfectionist",
+        description: "Get 5 PRs merged this week",
+        progress: prs,
+        total: 5,
+        xp: 300,
+        type: "pr",
+      },
+    ];
+
+    res.json({ challenges });
+  } catch (err) {
+    console.error("Failed to fetch GitHub events:", err);
+    res.status(500).json({ message: "Failed to fetch challenges", error: err });
   }
 });
 

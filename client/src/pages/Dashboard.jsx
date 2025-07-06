@@ -229,7 +229,7 @@ const Dashboard = () => {
   };
 
   /* still static for now */
-  const [challenges] = useState([
+  const [challenges, setChallenges] = useState([
     {
       id: 1,
       name: "Commit Streak",
@@ -254,16 +254,17 @@ const Dashboard = () => {
   useEffect(() => {
     const load = async () => {
       try {
-        const [profile, stats, weekly, ach, lb, repoList] = await Promise.all([
-          apiGet("/api/github/profile"),
-          apiGet("/api/github/stats"),
-          apiGet("/api/github/weekly-activity"),
-          apiGet("/api/github/achievements"),
-          apiGet("/api/leaderboard"),
-          apiGet("/api/github/repos"),
-        ]);
+        const [profile, stats, weekly, ach, lb, repoList, challengeList] =
+          await Promise.all([
+            apiGet("/api/github/profile"),
+            apiGet("/api/github/stats"),
+            apiGet("/api/github/weekly-activity"),
+            apiGet("/api/github/achievements"),
+            apiGet("/api/leaderboard"),
+            apiGet("/api/github/repos"),
+            apiGet("/api/github/challenges"),
+          ]);
 
-        /* merge data into the shape your UI expects */
         setUser({
           name: profile.name || profile.login,
           level: calcLevel(stats.totalCommits),
@@ -273,19 +274,22 @@ const Dashboard = () => {
           totalCommits: stats.totalCommits,
           totalPRs: stats.totalPRs,
           totalRepos: stats.repos,
-          rank: "Elite Contributor", // placeholder – compute later
+          rank: "Elite Contributor",
         });
+
         setWeeklyStats(weekly);
         setAchievements(ach.achievements);
         setLeaderboard(lb);
         setRepos(repoList);
+        setChallenges(challengeList.challenges); // ✅ THIS LINE BELONGS HERE
         setLoading(false);
       } catch (err) {
         setError(err.message);
         setLoading(false);
       }
     };
-    load();
+
+    load(); // ✅ Don't forget to call it
   }, []);
 
   const calcLevel = (xp) => Math.floor(xp / 50) + 1;
