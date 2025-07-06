@@ -457,7 +457,7 @@ const Dashboard = () => {
         <div className="p-6 border-b border-purple-500/20">
           <Link to="/" className="flex items-center space-x-3 hover:opacity-80">
             <div className="bg-gradient-to-r from-pink-500 to-purple-600 p-2 rounded-xl">
-              <Github className="w-6 h-6 text-white" />
+              <GitBranch className="w-6 h-6 text-white" />
             </div>
             <h1 className="text-xl font-bold bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
               Forknight
