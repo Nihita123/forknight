@@ -94,7 +94,8 @@ export default function GitHubAuthPage() {
   const handleConnect = () => {
     const clientId = import.meta.env.VITE_GITHUB_CLIENT_ID;
     const redirectUri = "http://localhost:5144";
-    window.location.href = "http://localhost:5000/auth/github";
+    window.location.href =
+      "https://forknight-server-l81t.onrender.com/auth/github/callback";
   };
 
   const handleCloseAuth = () => {
