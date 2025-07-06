@@ -40,10 +40,8 @@ const getRarityColor = (rarity) => {
       return "from-purple-500 to-purple-600";
   }
 };
-const formatUnlockDate = (dateString) => {
-  const date = new Date(dateString);
-  return date.toLocaleDateString();
-};
+
+
 const AchievementCard = ({ achievement }) => {
   if (!achievement) return null;
   return (
@@ -245,6 +243,16 @@ const Dashboard = () => {
             apiGet("/api/github/challenges"),
           ]);
 
+        const getRankFromXP = (xp) => {
+          if (xp >= 500) return "Legendary Coder";
+          if (xp >= 300) return "Elite Contributor";
+          if (xp >= 250) return "Pro Hacker";
+          if (xp >= 150) return "Skilled Dev";
+          if (xp >= 100) return "Code Explorer";
+          if (xp >= 50) return "Rookie Committer";
+          return "Newbie";
+        };
+
         setUser({
           name: profile.name || profile.login,
           level: calcLevel(stats.totalCommits),
@@ -254,7 +262,7 @@ const Dashboard = () => {
           totalCommits: stats.totalCommits,
           totalPRs: stats.totalPRs,
           totalRepos: stats.repos,
-          rank: "Elite Contributor",
+          rank: getRankFromXP(stats.totalCommits),
         });
 
         setWeeklyStats(weekly);
@@ -704,7 +712,7 @@ const Dashboard = () => {
                       Active Challenges
                     </h3>
                     <div className="space-y-4">
-                      {challenges.map((challenge) => (
+                      {challenges.slice(0, 2).map((challenge) => (
                         <div
                           key={challenge.id}
                           className="bg-purple-600/20 rounded-xl p-4"

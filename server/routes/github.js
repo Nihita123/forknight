@@ -163,8 +163,7 @@ router.get("/repos", async (req, res) => {
   }
 });
 
-/* ------------------------------------------------------------------ */
-/*  /api/github/challenges  ----------------------------------------- */
+
 /* ------------------------------------------------------------------ */
 /*  /api/github/challenges  ----------------------------------------- */
 router.get("/challenges", async (req, res) => {
@@ -284,7 +283,7 @@ router.get("/challenges", async (req, res) => {
         id: 1,
         name: "Commit Streak",
         description: "Make 30 commits in 30 days",
-        progress: Math.min(finalCommitCount, 30), // Cap at 30 for display
+        progress: commits,
         total: 30,
         xp: 500,
         type: "streak",
@@ -295,7 +294,7 @@ router.get("/challenges", async (req, res) => {
         id: 2,
         name: "PR Perfectionist",
         description: "Get 5 PRs merged this week",
-        progress: Math.min(finalPRCount, 5), // Cap at 5 for display
+        progress: prs,
         total: 5,
         xp: 300,
         type: "pr",
@@ -323,6 +322,60 @@ router.get("/challenges", async (req, res) => {
         type: "consistency",
         timeframe: "30 days",
         actualProgress: commitDates.size,
+      },
+      {
+        id: 3,
+        name: "Issue Crusher",
+        description: "Close 10 issues in a week",
+        progress: 4,
+        total: 10,
+        xp: 250,
+        type: "issues",
+      },
+      {
+        id: 4,
+        name: "Review Master",
+        description: "Review 5 pull requests",
+        progress: 1,
+        total: 5,
+        xp: 200,
+        type: "review",
+      },
+      {
+        id: 5,
+        name: "Rapid Fire Commits",
+        description: "Push 10 commits in a day",
+        progress: 6,
+        total: 100,
+        xp: 150,
+        type: "streak",
+      },
+      {
+        id: 6,
+        name: "Open Source Starter",
+        description: "Create your first public repo",
+        progress: 1,
+        total: 1,
+        xp: 100,
+        type: "repo",
+      },
+      {
+        id: 7,
+        name: "Bug Basher",
+        description: "Fix 3 bugs reported by others",
+        progress: 1,
+        total: 3,
+        xp: 200,
+        type: "issues",
+      },
+      {
+        id: 8,
+        name: "Weekly Warrior",
+        description: "Complete all weekly tasks",
+        progress: 2,
+        total: 4,
+        xp: 400,
+        type: "weekly",
       },
     ];
 
