@@ -97,7 +97,7 @@ app.get(
 
     const redirectURL = allowedOrigins.includes(origin)
       ? `${origin}/dashboard`
-      : "http://localhost:5145/dashboard"; // fallback default
+      : "http://localhost:5144/dashboard"; // fallback default
 
     res.redirect(redirectURL);
   }
