@@ -163,7 +163,6 @@ router.get("/repos", async (req, res) => {
   }
 });
 
-
 /* ------------------------------------------------------------------ */
 /*  /api/github/challenges  ----------------------------------------- */
 router.get("/challenges", async (req, res) => {
@@ -283,8 +282,9 @@ router.get("/challenges", async (req, res) => {
         id: 1,
         name: "Commit Streak",
         description: "Make 30 commits in 30 days",
-        progress: commits,
-        total: 30,
+        progress: finalCommitCount,
+
+        total: 50,
         xp: 500,
         type: "streak",
         timeframe: "30 days",
@@ -294,7 +294,8 @@ router.get("/challenges", async (req, res) => {
         id: 2,
         name: "PR Perfectionist",
         description: "Get 5 PRs merged this week",
-        progress: prs,
+        progress: finalPRCount,
+
         total: 5,
         xp: 300,
         type: "pr",
@@ -304,9 +305,9 @@ router.get("/challenges", async (req, res) => {
       {
         id: 3,
         name: "Daily Coder",
-        description: "Code for 7 consecutive days",
+        description: "Code for 10 consecutive days",
         progress: Math.min(commitStreak, 7),
-        total: 7,
+        total: 10,
         xp: 200,
         type: "streak",
         timeframe: "consecutive days",
@@ -324,7 +325,7 @@ router.get("/challenges", async (req, res) => {
         actualProgress: commitDates.size,
       },
       {
-        id: 3,
+        id: 5,
         name: "Issue Crusher",
         description: "Close 10 issues in a week",
         progress: 4,
@@ -333,7 +334,7 @@ router.get("/challenges", async (req, res) => {
         type: "issues",
       },
       {
-        id: 4,
+        id: 6,
         name: "Review Master",
         description: "Review 5 pull requests",
         progress: 1,
@@ -342,7 +343,7 @@ router.get("/challenges", async (req, res) => {
         type: "review",
       },
       {
-        id: 5,
+        id: 7,
         name: "Rapid Fire Commits",
         description: "Push 10 commits in a day",
         progress: 6,
@@ -351,7 +352,7 @@ router.get("/challenges", async (req, res) => {
         type: "streak",
       },
       {
-        id: 6,
+        id: 8,
         name: "Open Source Starter",
         description: "Create your first public repo",
         progress: 1,
@@ -360,7 +361,7 @@ router.get("/challenges", async (req, res) => {
         type: "repo",
       },
       {
-        id: 7,
+        id: 9,
         name: "Bug Basher",
         description: "Fix 3 bugs reported by others",
         progress: 1,
@@ -369,7 +370,7 @@ router.get("/challenges", async (req, res) => {
         type: "issues",
       },
       {
-        id: 8,
+        id: 10,
         name: "Weekly Warrior",
         description: "Complete all weekly tasks",
         progress: 2,
@@ -395,7 +396,7 @@ router.get("/challenges", async (req, res) => {
     console.error("Failed to fetch GitHub challenges:", err);
     res.status(500).json({
       message: "Failed to fetch challenges",
-      error: err.message,
+      error: err.stack,
     });
   }
 });
