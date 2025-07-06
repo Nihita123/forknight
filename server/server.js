@@ -39,9 +39,9 @@ app.use(
     resave: false,
     saveUninitialized: false,
     cookie: {
-      secure: false, // true only when you switch to HTTPS
+      secure: true, // true only when you switch to HTTPS
       httpOnly: true,
-      sameSite: "lax", // or "none" + secure:true when you test over HTTPS
+      sameSite: "None", // or "none" + secure:true when you test over HTTPS
     },
   })
 );
