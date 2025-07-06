@@ -11,7 +11,6 @@ import {
 
 const router = express.Router();
 
-
 const ensureAuth = (req, res, next) =>
   req.isAuthenticated()
     ? next()
@@ -164,72 +163,243 @@ router.get("/repos", async (req, res) => {
   }
 });
 
-
+/* ------------------------------------------------------------------ */
+/*  /api/github/challenges  ----------------------------------------- */
 /* ------------------------------------------------------------------ */
 /*  /api/github/challenges  ----------------------------------------- */
 router.get("/challenges", async (req, res) => {
   const accessToken = req.user.accessToken;
+  const username = req.user.username;
 
   try {
-    const [eventsRes, userRes] = await Promise.all([
-      fetch(`https://api.github.com/users/${req.user.username}/events`, {
+    // Get current date and 30 days ago for streak calculation
+    const now = new Date();
+    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+
+    // Fetch recent events (last 30 days)
+    const eventsRes = await fetch(
+      `https://api.github.com/users/${username}/events?per_page=100`,
+      {
         headers: {
           Authorization: `token ${accessToken}`,
           Accept: "application/vnd.github.v3+json",
         },
-      }),
-      fetch("https://api.github.com/user", {
-        headers: {
-          Authorization: `token ${accessToken}`,
-        },
-      }),
-    ]);
+      }
+    );
+
+    if (!eventsRes.ok) {
+      throw new Error(`GitHub API error: ${eventsRes.status}`);
+    }
 
     const events = await eventsRes.json();
-    const user = await userRes.json();
 
-    let commits = 0;
-    let prs = 0;
+    // Filter events for the last 30 days
+    const recentEvents = events.filter((event) => {
+      const eventDate = new Date(event.created_at);
+      return eventDate >= thirtyDaysAgo;
+    });
 
-    events.forEach((event) => {
-      if (event.type === "PushEvent") {
-        commits += event.payload.commits.length;
+    // Filter events for the last 7 days
+    const weeklyEvents = events.filter((event) => {
+      const eventDate = new Date(event.created_at);
+      return eventDate >= oneWeekAgo;
+    });
+
+    // Calculate commits in last 30 days
+    let commitsLast30Days = 0;
+    const commitDates = new Set();
+
+    recentEvents.forEach((event) => {
+      if (event.type === "PushEvent" && event.payload.commits) {
+        commitsLast30Days += event.payload.commits.length;
+        // Track unique days with commits
+        const eventDate = new Date(event.created_at).toDateString();
+        commitDates.add(eventDate);
       }
+    });
+
+    // Calculate PRs merged in last 7 days
+    let prsLastWeek = 0;
+    weeklyEvents.forEach((event) => {
       if (
         event.type === "PullRequestEvent" &&
         event.payload.action === "closed" &&
         event.payload.pull_request.merged
       ) {
-        prs += 1;
+        prsLastWeek += 1;
       }
     });
+
+    // Calculate commit streak (consecutive days with commits)
+    const commitStreak = calculateCommitStreak(recentEvents);
+
+    // Fetch additional data for more accurate challenges
+    const [searchCommitsRes, searchPRsRes] = await Promise.all([
+      // Search for commits in last 30 days
+      fetch(
+        `https://api.github.com/search/commits?q=author:${username}+committer-date:>=${
+          thirtyDaysAgo.toISOString().split("T")[0]
+        }&per_page=100`,
+        {
+          headers: {
+            Authorization: `token ${accessToken}`,
+            Accept: "application/vnd.github.cloak-preview+json",
+          },
+        }
+      ),
+      // Search for PRs in last 7 days
+      fetch(
+        `https://api.github.com/search/issues?q=author:${username}+type:pr+created:>=${
+          oneWeekAgo.toISOString().split("T")[0]
+        }&per_page=100`,
+        {
+          headers: {
+            Authorization: `token ${accessToken}`,
+          },
+        }
+      ),
+    ]);
+
+    let searchCommits = 0;
+    let searchPRs = 0;
+
+    // Use search results if available, otherwise fall back to events
+    if (searchCommitsRes.ok) {
+      const searchCommitsData = await searchCommitsRes.json();
+      searchCommits = searchCommitsData.total_count || 0;
+    }
+
+    if (searchPRsRes.ok) {
+      const searchPRsData = await searchPRsRes.json();
+      searchPRs = searchPRsData.total_count || 0;
+    }
+
+    // Use the more accurate count if available
+    const finalCommitCount = Math.max(commitsLast30Days, searchCommits);
+    const finalPRCount = Math.max(prsLastWeek, searchPRs);
 
     const challenges = [
       {
         id: 1,
         name: "Commit Streak",
         description: "Make 30 commits in 30 days",
-        progress: commits,
+        progress: Math.min(finalCommitCount, 30), // Cap at 30 for display
         total: 30,
         xp: 500,
         type: "streak",
+        timeframe: "30 days",
+        actualProgress: finalCommitCount,
       },
       {
         id: 2,
         name: "PR Perfectionist",
         description: "Get 5 PRs merged this week",
-        progress: prs,
+        progress: Math.min(finalPRCount, 5), // Cap at 5 for display
         total: 5,
         xp: 300,
         type: "pr",
+        timeframe: "7 days",
+        actualProgress: finalPRCount,
+      },
+      {
+        id: 3,
+        name: "Daily Coder",
+        description: "Code for 7 consecutive days",
+        progress: Math.min(commitStreak, 7),
+        total: 7,
+        xp: 200,
+        type: "streak",
+        timeframe: "consecutive days",
+        actualProgress: commitStreak,
+      },
+      {
+        id: 4,
+        name: "Active Contributor",
+        description: "Make commits on 15 different days this month",
+        progress: Math.min(commitDates.size, 15),
+        total: 15,
+        xp: 400,
+        type: "consistency",
+        timeframe: "30 days",
+        actualProgress: commitDates.size,
       },
     ];
 
-    res.json({ challenges });
+    res.json({
+      challenges,
+      debug: {
+        eventsCount: events.length,
+        recentEventsCount: recentEvents.length,
+        weeklyEventsCount: weeklyEvents.length,
+        commitDatesCount: commitDates.size,
+        finalCommitCount,
+        finalPRCount,
+        commitStreak,
+      },
+    });
   } catch (err) {
-    console.error("Failed to fetch GitHub events:", err);
-    res.status(500).json({ message: "Failed to fetch challenges", error: err });
+    console.error("Failed to fetch GitHub challenges:", err);
+    res.status(500).json({
+      message: "Failed to fetch challenges",
+      error: err.message,
+    });
   }
 });
+
+// Helper function to calculate commit streak
+function calculateCommitStreak(events) {
+  const commitDates = new Set();
+
+  events.forEach((event) => {
+    if (event.type === "PushEvent" && event.payload.commits) {
+      const eventDate = new Date(event.created_at).toDateString();
+      commitDates.add(eventDate);
+    }
+  });
+
+  const sortedDates = Array.from(commitDates)
+    .map((date) => new Date(date))
+    .sort((a, b) => b - a); // Sort in descending order (most recent first)
+
+  if (sortedDates.length === 0) return 0;
+
+  let streak = 1;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
+  // Check if the most recent commit was today or yesterday
+  const mostRecentCommit = sortedDates[0];
+  mostRecentCommit.setHours(0, 0, 0, 0);
+
+  const daysDifference = Math.floor(
+    (today - mostRecentCommit) / (1000 * 60 * 60 * 24)
+  );
+
+  if (daysDifference > 1) {
+    return 0; // Streak is broken if no commits in the last 2 days
+  }
+
+  // Count consecutive days
+  for (let i = 1; i < sortedDates.length; i++) {
+    const currentDate = sortedDates[i];
+    const previousDate = sortedDates[i - 1];
+
+    currentDate.setHours(0, 0, 0, 0);
+    previousDate.setHours(0, 0, 0, 0);
+
+    const daysBetween = Math.floor(
+      (previousDate - currentDate) / (1000 * 60 * 60 * 24)
+    );
+
+    if (daysBetween === 1) {
+      streak++;
+    } else {
+      break;
+    }
+  }
+
+  return streak;
+}
 
 export default router;

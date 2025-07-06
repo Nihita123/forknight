@@ -40,8 +40,10 @@ const getRarityColor = (rarity) => {
       return "from-purple-500 to-purple-600";
   }
 };
-
-
+const formatUnlockDate = (dateString) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString();
+};
 const AchievementCard = ({ achievement }) => {
   if (!achievement) return null;
   return (
@@ -177,7 +179,6 @@ const AchievementCard = ({ achievement }) => {
   );
 };
 
-
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
 
@@ -190,7 +191,7 @@ const Dashboard = () => {
   const [achievements, setAchievements] = useState([]);
   const [leaderboard, setLeaderboard] = useState([]);
   const [repos, setRepos] = useState([]);
-
+  const [challenges, setChallenges] = useState([]);
   const [achievementSearch, setAchievementSearch] = useState("");
   const [achievementFilter, setAchievementFilter] = useState("all");
   const [achievementSort, setAchievementSort] = useState("recent");
@@ -229,28 +230,7 @@ const Dashboard = () => {
   };
 
   /* still static for now */
-  const [challenges, setChallenges] = useState([
-    {
-      id: 1,
-      name: "Commit Streak",
-      description: "Make 30 commits in 30 days",
-      progress: 15,
-      total: 30,
-      xp: 500,
-      type: "streak",
-    },
-    {
-      id: 2,
-      name: "PR Perfectionist",
-      description: "Get 5 PRs merged this week",
-      progress: 3,
-      total: 5,
-      xp: 300,
-      type: "pr",
-    },
-  ]);
-
-  /* fetch once on mount */
+  // Update the challenges section in the useEffect
   useEffect(() => {
     const load = async () => {
       try {
@@ -281,20 +261,110 @@ const Dashboard = () => {
         setAchievements(ach.achievements);
         setLeaderboard(lb);
         setRepos(repoList);
-        setChallenges(challengeList.challenges); // ✅ THIS LINE BELONGS HERE
+
+        // Better handling of challenges data
+        if (challengeList && challengeList.challenges) {
+          setChallenges(challengeList.challenges);
+        } else {
+          // Fallback to empty array if challenges fail to load
+          setChallenges([]);
+        }
+
         setLoading(false);
       } catch (err) {
+        console.error("Failed to load dashboard data:", err);
         setError(err.message);
         setLoading(false);
       }
     };
 
-    load(); // ✅ Don't forget to call it
+    load();
   }, []);
 
-  const calcLevel = (xp) => Math.floor(xp / 50) + 1;
+  // Updated challenge card component for better progress display
+  const ChallengeCard = ({ challenge }) => {
+    const progressPercentage = Math.min(
+      (challenge.progress / challenge.total) * 100,
+      100
+    );
+    const isCompleted = challenge.progress >= challenge.total;
 
-  /* helper to pick an icon for challenges */
+    return (
+      <div className="bg-black/20 backdrop-blur-sm rounded-2xl p-6 border border-purple-500/20 relative overflow-hidden">
+        {/* Completion Badge */}
+        {isCompleted && (
+          <div className="absolute top-4 right-4">
+            <div className="bg-green-500/20 text-green-400 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1">
+              <CheckCircle className="w-3 h-3" />
+              COMPLETE
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <div className="text-2xl text-purple-400">
+              {getChallengeIcon(challenge.type)}
+            </div>
+            <div>
+              <h3 className="text-xl font-bold">{challenge.name}</h3>
+              <p className="text-sm text-purple-300">{challenge.description}</p>
+              {challenge.timeframe && (
+                <p className="text-xs text-purple-400 mt-1">
+                  Timeframe: {challenge.timeframe}
+                </p>
+              )}
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="text-2xl font-bold text-yellow-400">
+              +{challenge.xp} XP
+            </div>
+            {challenge.actualProgress &&
+              challenge.actualProgress > challenge.total && (
+                <div className="text-xs text-green-400">
+                  {challenge.actualProgress} total!
+                </div>
+              )}
+          </div>
+        </div>
+
+        <div className="mb-4">
+          <div className="flex justify-between text-sm text-purple-300 mb-1">
+            <span>Progress</span>
+            <span>
+              {challenge.progress}/{challenge.total}
+            </span>
+          </div>
+          <div className="w-full bg-purple-900/50 rounded-full h-3">
+            <div
+              className={`h-3 rounded-full transition-all duration-500 ${
+                isCompleted
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500"
+                  : "bg-gradient-to-r from-pink-500 to-purple-500"
+              }`}
+              style={{
+                width: `${progressPercentage}%`,
+              }}
+            ></div>
+          </div>
+        </div>
+
+        <div className="text-center">
+          <div
+            className={`text-3xl font-bold ${
+              isCompleted ? "text-green-400" : "text-purple-400"
+            }`}
+          >
+            {Math.round(progressPercentage)}%
+          </div>
+          <div className="text-sm text-purple-300">
+            {isCompleted ? "Completed!" : "Complete"}
+          </div>
+        </div>
+      </div>
+    );
+  };
   const getChallengeIcon = (type) => {
     switch (type) {
       case "streak":
@@ -309,6 +379,9 @@ const Dashboard = () => {
         return <Code className="w-5 h-5" />;
     }
   };
+  const calcLevel = (xp) => Math.floor(xp / 50) + 1;
+
+  /* helper to pick an icon for challenges */
 
   /* ───── loading / error fallbacks ───── */
   if (loading) {
@@ -1034,9 +1107,7 @@ const Dashboard = () => {
           )}
 
           {/* Achievement Card Component */}
-          <AchievementCard/>
-
-          
+          <AchievementCard />
 
           {activeTab === "leaderboard" && (
             <div className="max-w-2xl mx-auto">
