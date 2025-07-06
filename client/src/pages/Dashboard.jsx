@@ -557,14 +557,25 @@ const Dashboard = () => {
                     "Customize your developer profile"}
                 </p>
               </div>
-              <div className="flex items-center gap-2">
-                <div className="bg-purple-600/20 rounded-lg px-3 py-1 text-sm">
+              <div className="flex items-center justify-between px-4 py-3 bg-purple-800/30 rounded-lg">
+                {/* Rank Badge */}
+                <div className="bg-purple-600/40 rounded-full px-4 py-1 text-sm font-medium text-white">
                   <span className="text-purple-300">Rank: </span>
-                  <span className="font-bold">{user.rank}</span>
+                  <span className="text-white font-bold">{user.rank}</span>
                 </div>
+
+                {/* Greeting Section */}
                 <div className="text-right">
                   <p className="text-sm text-purple-300">Hey there,</p>
-                  <p className="text-lg font-bold">{user.name}! 🎮</p>
+                  <p className="text-xl font-extrabold text-white">
+                    <span className="inline-block align-middle text-2xl mr-1 bg-gradient-to-r from-pink-400 to-purple-400 bg-clip-text text-transparent">
+                      🎮
+                    </span>
+                    <span className="align-middle">
+                      {user.name}
+                      <span className="text-purple-300"> !</span>
+                    </span>
+                  </p>
                 </div>
               </div>
             </div>
