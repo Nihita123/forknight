@@ -15,9 +15,10 @@ import {
   BookOpen,
   Zap,
   Crown,
+  LogOut,
 } from "lucide-react";
 
-import { apiGet } from "../utils/api";
+import { apiGet, apiPost } from "../utils/api";
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
@@ -32,8 +33,28 @@ const Dashboard = () => {
   const [leaderboard, setLeaderboard] = useState([]);
   const [repos, setRepos] = useState([]);
 
-  /* - */
-  const [challenges, setChallenges] = useState([]);
+
+  /* still static for now */
+  const [challenges] = useState([
+    {
+      id: 1,
+      name: "Commit Streak",
+      description: "Make 30 commits in 30 days",
+      progress: 15,
+      total: 30,
+      xp: 500,
+      type: "streak",
+    },
+    {
+      id: 2,
+      name: "PR Perfectionist",
+      description: "Get 5 PRs merged this week",
+      progress: 3,
+      total: 5,
+      xp: 300,
+      type: "pr",
+    },
+  ]);
 
   /* fetch once on mount */
   useEffect(() => {
@@ -54,7 +75,7 @@ const Dashboard = () => {
           name: profile.name || profile.login,
           level: calcLevel(stats.totalCommits),
           xp: stats.totalCommits,
-          xpToNext: 1000 - (stats.totalCommits % 1000),
+          xpToNext: 100 - (stats.totalCommits % 100),
           streak: weekly.commits,
           totalCommits: stats.totalCommits,
           totalPRs: stats.totalPRs,
@@ -77,9 +98,6 @@ const Dashboard = () => {
     load(); // ✅ Don't forget to call it
   }, []);
 
-  //--
-
-  //--
   const calcLevel = (xp) => Math.floor(xp / 1000) + 1;
 
   /* helper to pick an icon for challenges */
@@ -143,6 +161,16 @@ const Dashboard = () => {
       icon: <Crown className="w-5 h-5" />,
     },
   ];
+  const handleLogout = async () => {
+    try {
+      await apiPost("/api/auth/logout");
+      window.location.href = "/"; // or use navigate("/") if using react-router
+    } catch (err) {
+      console.error("Logout failed", err);
+      alert("Logout failed. Try again.");
+    }
+  };
+
   const topPlayers = Array.isArray(leaderboard) ? leaderboard.slice(0, 5) : [];
 
   return (
@@ -185,7 +213,7 @@ const Dashboard = () => {
             <div className="w-full bg-purple-900/50 rounded-full h-2">
               <div
                 className="bg-gradient-to-r from-pink-500 to-purple-500 h-2 rounded-full"
-                style={{ width: `${((user.xp % 1000) / 1000) * 100}%` }}
+                style={{ width: `${((user.xp % 50) / 50) * 100}%` }}
               ></div>
             </div>
           </div>
@@ -227,6 +255,19 @@ const Dashboard = () => {
               <div className="text-xs text-purple-300">Repos</div>
             </div>
           </div>
+        </div>
+        {/* Logout */}
+        <div className="p-4 border-t border-purple-500/20">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2
+               bg-gradient-to-r from-pink-600/40 to-purple-600/40
+               hover:from-pink-600/60 hover:to-purple-600/60
+               text-white font-semibold py-3 rounded-xl transition"
+          >
+            <LogOut className="w-5 h-5" />
+            Logout
+          </button>
         </div>
       </div>
 
@@ -298,7 +339,7 @@ const Dashboard = () => {
                   <div className="w-full bg-purple-900/50 rounded-full h-3">
                     <div
                       className="bg-gradient-to-r from-pink-500 to-purple-500 h-3 rounded-full transition-all duration-300"
-                      style={{ width: `${((user.xp % 1000) / 1000) * 100}%` }}
+                      style={{ width: `${((user.xp % 50) / 50) * 100}%` }}
                     ></div>
                   </div>
                 </div>
