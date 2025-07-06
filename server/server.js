@@ -12,7 +12,7 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 // CORS setup
-const allowedOrigins = ["http://localhost:5145", "http://localhost:5144"];
+const allowedOrigins = ["http://localhost:5144", "http://localhost:5144"];
 
 app.use(
   cors({
@@ -93,7 +93,7 @@ app.get(
   }),
   (req, res) => {
     // Success – redirect to frontend
-    res.redirect("http://localhost:5145/dashboard"); // ✅ correct port
+    res.redirect("http://localhost:5144/dashboard"); // ✅ correct port
   }
 );
 
