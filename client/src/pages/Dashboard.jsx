@@ -751,7 +751,7 @@ const Dashboard = () => {
                       Recent Achievements
                     </h3>
                     <div className="grid grid-cols-2 gap-3">
-                      {achievements.slice(0, 6).map((achievement) => (
+                      {achievements.slice(0, 15).map((achievement) => (
                         <div
                           key={achievement.id}
                           className={`p-3 rounded-xl text-center ${

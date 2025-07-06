@@ -91,7 +91,7 @@ router.get("/achievements", async (req, res) => {
       },
       {
         id: 3,
-        name: "PR Master",
+        name: "PR Master - 10 pull requests",
         unlocked: totalPRs >= 50,
       },
       {
@@ -108,6 +108,49 @@ router.get("/achievements", async (req, res) => {
         id: 6,
         name: "Consistency Champ - 7-day streak",
         unlocked: currentStreak >= 7,
+      },
+      {
+        id: 7,
+        name: "Issue Crusher - 50 issues raised",
+        unlocked: totalIssues >= 50,
+      },
+      {
+        id: 8,
+        name: "Day One Streaker - 1 day coding streak",
+        unlocked: currentStreak >= 1,
+      },
+      {
+        id: 9,
+        name: "Consistency Champ - 7-day streak",
+        unlocked: currentStreak >= 7,
+      },
+      {
+        id: 10,
+        name: "Weekend Warrior - 10 commits this week",
+        unlocked: weeklyStats.commits >= 10,
+      },
+      {
+        id: 11,
+        name: "Push to the Limit - 20 commits this week",
+        unlocked: weeklyStats.commits >= 20,
+      },
+      {
+        id: 12,
+        name: "Open Source Enthusiast - 3 PRs this week",
+        unlocked: weeklyStats.prs >= 3,
+      },
+      {
+        id: 13,
+        name: "Bug Fixer - 3 issues this week",
+        unlocked: weeklyStats.issues >= 3,
+      },
+      {
+        id: 14,
+        name: "Weekly Legend - All stats > 5 this week",
+        unlocked:
+          weeklyStats.commits >= 5 &&
+          weeklyStats.prs >= 5 &&
+          weeklyStats.issues >= 5,
       },
     ];
 
