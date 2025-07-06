@@ -70,7 +70,9 @@ We’re turning every GitHub action into a game mechanic:
 
 ## 🚀 Demo
 
-🧪 Coming soon: https://forknight.vercel.app/
+Curious to see ForkNight in action? Get ready to level up your open source game!
+
+🌐 **Link To ForkNight:**  [https://forknight.vercel.app/](https://forknight.vercel.app/)
 
 ---
 
@@ -85,4 +87,68 @@ We’re turning every GitHub action into a game mechanic:
 
 
 
+
+
+## 🤝 Contributing
+
+We love contributions! ForkNight is open to pull requests, issues, and ideas. Here's how to get started:
+
+### 1. Clone the Repo
+
+```bash
+git clone https://github.com/your-username/forknight.git
+cd forknight
+````
+
+### 2\. Install Dependencies
+
+#### Backend (server/)
+
+```bash
+cd server
+npm install
+```
+
+#### Frontend (client/)
+
+```bash
+cd ../client
+npm install
+```
+
+### 3\. Environment Setup
+
+Create a `.env` file inside the `server/` directory with the following:
+
+```env
+GITHUB_CLIENT_ID=your_client_id
+GITHUB_CLIENT_SECRET=your_client_secret
+SESSION_SECRET=your_session_secret
+MONGO_URI=your_mongodb_connection_string
+```
+
+⚠️ **Never commit `.env` files\!**
+
+### 4\. Run the App
+
+Open two terminal windows(split terminal):
+
+#### Terminal 1: Start the backend
+
+```bash
+cd server
+npm run dev
+```
+
+#### Terminal 2: Start the frontend
+
+```bash
+cd client
+npm run dev
+```
+Go to http://localhost:5173 in your browser.
+
+Have Fun Contributing!
+
+---
 
