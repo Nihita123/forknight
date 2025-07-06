@@ -5,11 +5,12 @@ import session from "express-session";
 import passport from "passport";
 import GitHubStrategy from "passport-github2";
 import githubRoutes from "./routes/github.js";
+
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
-app.use("/api/github", githubRoutes);
+
 // CORS setup
 app.use(
   cors({
@@ -33,6 +34,7 @@ app.use(
 // Passport setup
 app.use(passport.initialize());
 app.use(passport.session());
+app.use("/api/github", githubRoutes);
 
 // GitHub Strategy
 passport.use(
@@ -76,7 +78,7 @@ app.get(
   }),
   (req, res) => {
     // Success – redirect to frontend
-    res.redirect("http://localhost:5173/dashboard");
+    res.redirect("http://localhost:5145/dashboard"); // ✅ correct port
   }
 );
 
